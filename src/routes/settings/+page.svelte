@@ -31,6 +31,7 @@
     Lock,
     MonitorSmartphone,
     RefreshCcw,
+    Github,
   } from "lucide-svelte";
   import ThemeToggle from "$lib/components/ThemeToggle.svelte";
 
@@ -785,6 +786,26 @@
           >
             {m.settings_export_button()}
           </button>
+
+          <div class="divider my-4"></div>
+
+          <!-- Open Source Section -->
+          <div class="flex items-center gap-2 mb-3">
+            <Github size={20} class="text-primary" />
+            <h2 class="card-title text-lg">{m.about_title()}</h2>
+          </div>
+          <p class="text-sm text-base-content/70 mb-3">
+            {m.about_description()}
+          </p>
+          <a
+            href="https://github.com/Xtopia5616/webotp"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn btn-outline btn-primary w-full"
+          >
+            <Github size={18} />
+            {m.about_github_link()}
+          </a>
         </div>
       </div>
 

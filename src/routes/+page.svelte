@@ -24,6 +24,7 @@
     ShieldAlert,
     LogIn,
     ShieldCheck,
+    Github,
   } from "lucide-svelte";
 
   let masterPassword = $state("");
@@ -214,6 +215,18 @@
           class="link link-hover text-sm text-base-content/70 hover:text-primary"
         >
           {m.login_create_link()}
+        </a>
+      </div>
+
+      <div class="mt-8 text-center">
+        <a
+          href="https://github.com/Xtopia5616/webotp"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="link link-hover text-sm text-base-content/50 hover:text-primary flex items-center justify-center gap-1"
+        >
+          <Github size={14} />
+          <span>{m.home_opensource_link()}</span>
         </a>
       </div>
     </div>

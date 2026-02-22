@@ -144,5 +144,9 @@
   "edit_subtitle": "修改两步验证详情",
   "edit_delete_confirm": "确定要删除此账户吗？此操作无法撤销。",
   "home_description": "一个安全的开源双因素认证应用，采用端到端加密。您的密钥从不离开设备。",
-  "home_get_started": "开始使用"
+  "home_get_started": "开始使用",
+  "about_title": "开源项目",
+  "about_description": "WebOTP 是一个开源项目。在 GitHub 上查看源代码。",
+  "about_github_link": "在 GitHub 上查看",
+  "home_opensource_link": "在 GitHub 上查看源码"
 }

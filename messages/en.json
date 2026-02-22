@@ -144,5 +144,9 @@
   "edit_subtitle": "Update 2FA details",
   "edit_delete_confirm": "Are you sure you want to delete this account? This action cannot be undone.",
   "home_description": "A secure, open-source 2FA app with end-to-end encryption. Your secrets never leave your device.",
-  "home_get_started": "Get Started"
+  "home_get_started": "Get Started",
+  "about_title": "Open Source",
+  "about_description": "WebOTP is an open source project. View the source code on GitHub.",
+  "about_github_link": "View on GitHub",
+  "home_opensource_link": "Open Source on GitHub"
 }
