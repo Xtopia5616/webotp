@@ -71,7 +71,7 @@
   "add_scan_qr": "Scan QR Code",
   "add_scan_image": "Upload Image",
   "add_import_file": "Import from Files",
-  "add_import_hint": "Supported: WebOTP, Aegis, 2FAS (.json, .txt). For Google Authenticator, use Scan QR Code.",
+  "add_import_hint": "Supports importing from WebOTP, Aegis, and 2FAS (in both .json and .txt formats).For Google Authenticator, save the file obtained by scanning the exported QR code as a .txt file before uploading.",
   "add_or_manual": "Or enter manually",
   "recovery_title": "Recover Vault",
   "recovery_subtitle": "Use your Recovery Key",
