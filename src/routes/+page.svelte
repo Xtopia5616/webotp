@@ -26,7 +26,6 @@
     LogIn,
     ShieldCheck,
     Github,
-    Trash2,
   } from "lucide-svelte";
 
   let masterPassword = $state("");
