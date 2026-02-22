@@ -8,7 +8,11 @@
     account,
     onEdit,
     onDelete,
-  }: { account: Account; onEdit: (account: Account) => void; onDelete: (account: Account) => void } = $props();
+  }: {
+    account: Account;
+    onEdit: (account: Account) => void;
+    onDelete: (account: Account) => void;
+  } = $props();
 
   let code = $state("------");
   let exactRemaining = $state(0);

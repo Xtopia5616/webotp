@@ -341,8 +341,7 @@
         onclick={confirmDelete}
         disabled={deleteLoading}
       >
-        {#if deleteLoading}<span class="loading loading-spinner"
-          ></span>{/if}
+        {#if deleteLoading}<span class="loading loading-spinner"></span>{/if}
         {m.action_delete()}
       </button>
     </div>

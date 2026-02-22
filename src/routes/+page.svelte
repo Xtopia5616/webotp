@@ -428,7 +428,11 @@
       {:else}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {#each activeAccounts as account (account.id)}
-            <OtpCard {account} onEdit={openEditModal} onDelete={openDeleteModal} />
+            <OtpCard
+              {account}
+              onEdit={openEditModal}
+              onDelete={openDeleteModal}
+            />
           {/each}
 
           <!-- Add New Card Button -->
