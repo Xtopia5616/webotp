@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "top.xtopia.otp.twa",
+    "sha256_cert_fingerprints": ["BE:7A:42:2D:F3:4E:20:D9:1B:8B:8F:5A:25:B1:A1:CA:8C:C5:FF:81:79:10:3C:4D:6B:5E:3E:EE:01:A3:BA:09"]
+  }
+}]
