@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 强制统一所有主题的圆角大小，防止切换主题时 UI 形状发生变化 */
+@layer base {
+  :root,
+  [data-theme] {
+    --rounded-box: 1rem !important; /* 卡片、弹窗等大组件的圆角 */
+    --rounded-btn: 0.5rem !important; /* 按钮、输入框等小组件的圆角 */
+    --rounded-badge: 1.9rem !important; /* 徽章的圆角 */
+    --tab-radius: 0.5rem !important; /* 标签页的圆角 */
+  }
+}
