@@ -169,13 +169,13 @@
     tabindex="0"
     onkeydown={(e) => e.key === "Enter" && handleCardClick(e)}
   >
-    <div class="flex flex-col overflow-hidden pr-2">
+    <div class="flex flex-col overflow-hidden pr-2 min-w-0 flex-1">
       <span class="font-bold text-xl truncate">{account.issuer}</span>
       <span class="text-base-content/60 text-base truncate">{account.name}</span
       >
     </div>
 
-    <div class="flex items-center gap-2 sm:gap-4">
+    <div class="flex items-center gap-2 sm:gap-4 shrink-0">
       <button
         class="btn btn-sm btn-circle btn-ghost text-base-content/40 hover:text-primary hover:bg-base-200"
         onclick={(e) => {

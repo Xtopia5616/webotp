@@ -32,6 +32,8 @@
     MonitorSmartphone,
     RefreshCcw,
     Github,
+    ArrowLeft,
+    Check,
   } from "lucide-svelte";
   import ThemeToggle from "$lib/components/ThemeToggle.svelte";
 
@@ -431,6 +433,11 @@
 </script>
 
 <div class="hero min-h-screen bg-base-200 py-10 relative">
+  <div class="absolute top-4 left-4 z-50">
+    <a href="/" class="btn btn-ghost btn-circle">
+      <ArrowLeft size={20} />
+    </a>
+  </div>
   <div class="absolute top-4 right-4 z-50">
     <ThemeToggle />
   </div>
@@ -747,25 +754,32 @@
             {m.settings_install_description()}
           </p>
 
-          {#if isInstalled}
-            <div class="alert alert-success text-sm py-2 rounded-lg">
-              <span>{m.settings_install_installed()}</span>
-            </div>
-          {:else}
-            <button
-              type="button"
-              onclick={handleInstall}
-              class="btn btn-primary w-full"
-            >
-              <Download size={18} />
-              {m.settings_install_button()}
-            </button>
-            {#if !installPromptEvent}
-              <p class="text-xs text-base-content/50 mt-2 text-center">
-                {m.settings_install_fallback()}
-              </p>
+          <div class="mt-4">
+            {#if isInstalled}
+              <button
+                type="button"
+                class="btn btn-primary w-full opacity-60 cursor-default"
+                disabled
+              >
+                <Check size={18} />
+                {m.settings_install_installed()}
+              </button>
+            {:else}
+              <button
+                type="button"
+                onclick={handleInstall}
+                class="btn btn-primary w-full"
+              >
+                <Download size={18} />
+                {m.settings_install_button()}
+              </button>
+              {#if !installPromptEvent}
+                <p class="text-xs text-base-content/50 mt-2 text-center">
+                  {m.settings_install_fallback()}
+                </p>
+              {/if}
             {/if}
-          {/if}
+          </div>
 
           <div class="divider my-4"></div>
 
@@ -807,15 +821,6 @@
             {m.about_github_link()}
           </a>
         </div>
-      </div>
-
-      <div class="text-center mt-4">
-        <a
-          href="/"
-          class="link link-hover text-sm text-base-content/70 hover:text-primary"
-        >
-          {m.settings_back_link()}
-        </a>
       </div>
     {/if}
   </div>
