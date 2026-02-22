@@ -29,6 +29,9 @@
   let unlockError = $state("");
   let hasPRF = $state(false);
 
+  // Delete Modal State
+  let deleteLoading = $state(false);
+
   $effect(() => {
     if (account && !issuer && !name && !secret) {
       issuer = account.issuer;
@@ -109,17 +112,26 @@
     }
   }
 
-  async function handleDelete() {
-    if (!confirm(m.edit_delete_confirm())) return;
+  function openDeleteModal() {
+    const modal = document.getElementById("delete_modal") as HTMLDialogElement;
+    modal?.showModal();
+  }
 
-    loading = true;
+  function closeDeleteModal() {
+    const modal = document.getElementById("delete_modal") as HTMLDialogElement;
+    modal?.close();
+  }
+
+  async function confirmDelete() {
+    deleteLoading = true;
     try {
       await deleteAccount(accountId);
       await goto("/");
     } catch (e: unknown) {
       const err = e as Error;
       error = err.message;
-      loading = false;
+    } finally {
+      deleteLoading = false;
     }
   }
 </script>
@@ -298,7 +310,7 @@
             <button
               type="button"
               class="btn btn-error btn-outline w-full"
-              onclick={handleDelete}
+              onclick={openDeleteModal}
               disabled={loading}
             >
               <Trash2 size={18} />
@@ -310,3 +322,32 @@
     {/if}
   </div>
 </div>
+
+<!-- Delete Modal -->
+<dialog id="delete_modal" class="modal modal-bottom sm:modal-middle">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg mb-4 text-error">{m.action_delete()}</h3>
+    <p class="py-4">{m.edit_delete_confirm()}</p>
+    <div class="modal-action flex gap-2">
+      <button
+        type="button"
+        class="btn btn-ghost"
+        onclick={closeDeleteModal}
+        disabled={deleteLoading}>{m.action_cancel()}</button
+      >
+      <button
+        type="button"
+        class="btn btn-error"
+        onclick={confirmDelete}
+        disabled={deleteLoading}
+      >
+        {#if deleteLoading}<span class="loading loading-spinner"
+          ></span>{/if}
+        {m.action_delete()}
+      </button>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button onclick={closeDeleteModal}>close</button>
+  </form>
+</dialog>

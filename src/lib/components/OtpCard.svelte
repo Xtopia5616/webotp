@@ -1,13 +1,14 @@
 <script lang="ts">
   import { generateTOTP } from "$lib/utils/totp";
-  import { type Account, deleteAccount } from "$lib/stores/vault.svelte";
+  import { type Account } from "$lib/stores/vault.svelte";
   import { Check, Eye, EyeOff, Edit2, Trash2 } from "lucide-svelte";
   import * as m from "$paraglide/messages.js";
 
   let {
     account,
     onEdit,
-  }: { account: Account; onEdit: (account: Account) => void } = $props();
+    onDelete,
+  }: { account: Account; onEdit: (account: Account) => void; onDelete: (account: Account) => void } = $props();
 
   let code = $state("------");
   let exactRemaining = $state(0);
@@ -70,11 +71,9 @@
     setTimeout(() => (copied = false), 2000);
   }
 
-  async function handleDelete(e: Event) {
+  function handleDelete(e: Event) {
     e.stopPropagation();
-    if (confirm(m.edit_delete_confirm())) {
-      await deleteAccount(account.id);
-    }
+    onDelete(account);
   }
 
   function handleTouchStart(e: TouchEvent) {

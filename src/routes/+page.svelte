@@ -4,6 +4,7 @@
     vaultState,
     unlock,
     updateAccount,
+    deleteAccount,
     type Account,
   } from "$lib/stores/vault.svelte";
   import { authState, logout } from "$lib/stores/auth.svelte";
@@ -25,6 +26,7 @@
     LogIn,
     ShieldCheck,
     Github,
+    Trash2,
   } from "lucide-svelte";
 
   let masterPassword = $state("");
@@ -41,6 +43,13 @@
   let editSecret = $state("");
   let editLoading = $state(false);
   let editError = $state("");
+
+  // Delete Modal State
+  let deletingAccount = $state<Account | null>(null);
+  let deleteLoading = $state(false);
+
+  // Sign Out Modal State
+  let signOutLoading = $state(false);
 
   const activeAccounts = $derived(
     vaultState.accounts.filter((a) => !a.deletedAt),
@@ -125,9 +134,19 @@
     lock();
   }
 
-  async function handleSignOut() {
-    await logout();
-    await goto("/login");
+  function openSignOutModal() {
+    const modal = document.getElementById("signout_modal") as HTMLDialogElement;
+    modal?.showModal();
+  }
+
+  async function confirmSignOut() {
+    signOutLoading = true;
+    try {
+      await logout();
+      await goto("/login");
+    } finally {
+      signOutLoading = false;
+    }
   }
 
   function openEditModal(account: Account) {
@@ -162,6 +181,35 @@
       editError = (e as Error).message;
     } finally {
       editLoading = false;
+    }
+  }
+
+  function openDeleteModal(account: Account) {
+    deletingAccount = account;
+    const modal = document.getElementById("delete_modal") as HTMLDialogElement;
+    modal?.showModal();
+  }
+
+  function closeDeleteModal() {
+    const modal = document.getElementById("delete_modal") as HTMLDialogElement;
+    modal?.close();
+    deletingAccount = null;
+  }
+
+  async function confirmDelete() {
+    if (!deletingAccount) return;
+    deleteLoading = true;
+    try {
+      await deleteAccount(deletingAccount.id);
+      closeDeleteModal();
+      // Also close edit modal if open for the same account
+      if (editingAccount?.id === deletingAccount.id) {
+        closeEditModal();
+      }
+    } catch (e) {
+      console.error("Failed to delete account", e);
+    } finally {
+      deleteLoading = false;
     }
   }
 </script>
@@ -343,7 +391,7 @@
           <Settings size={20} />
         </a>
         <button
-          onclick={handleSignOut}
+          onclick={openSignOutModal}
           class="btn btn-ghost btn-circle text-error hover:bg-error/10"
           title={m.vault_signout_button()}
         >
@@ -380,7 +428,7 @@
       {:else}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {#each activeAccounts as account (account.id)}
-            <OtpCard {account} onEdit={openEditModal} />
+            <OtpCard {account} onEdit={openEditModal} onDelete={openDeleteModal} />
           {/each}
 
           <!-- Add New Card Button -->
@@ -479,6 +527,65 @@
       </div>
       <form method="dialog" class="modal-backdrop">
         <button onclick={closeEditModal}>close</button>
+      </form>
+    </dialog>
+
+    <!-- Delete Modal -->
+    <dialog id="delete_modal" class="modal modal-bottom sm:modal-middle">
+      <div class="modal-box">
+        <h3 class="font-bold text-lg mb-4 text-error">{m.action_delete()}</h3>
+        <p class="py-4">{m.edit_delete_confirm()}</p>
+        <div class="modal-action flex gap-2">
+          <button
+            type="button"
+            class="btn btn-ghost"
+            onclick={closeDeleteModal}
+            disabled={deleteLoading}>{m.action_cancel()}</button
+          >
+          <button
+            type="button"
+            class="btn btn-error"
+            onclick={confirmDelete}
+            disabled={deleteLoading}
+          >
+            {#if deleteLoading}<span class="loading loading-spinner"
+              ></span>{/if}
+            {m.action_delete()}
+          </button>
+        </div>
+      </div>
+      <form method="dialog" class="modal-backdrop">
+        <button onclick={closeDeleteModal}>close</button>
+      </form>
+    </dialog>
+
+    <!-- Sign Out Modal -->
+    <dialog id="signout_modal" class="modal modal-bottom sm:modal-middle">
+      <div class="modal-box">
+        <h3 class="font-bold text-lg mb-4">{m.vault_signout_button()}</h3>
+        <p class="py-4">Are you sure you want to sign out?</p>
+        <div class="modal-action flex gap-2">
+          <form method="dialog" class="w-full">
+            <button
+              type="submit"
+              class="btn btn-ghost w-full"
+              disabled={signOutLoading}>{m.action_cancel()}</button
+            >
+          </form>
+          <button
+            type="button"
+            class="btn btn-error w-full"
+            onclick={confirmSignOut}
+            disabled={signOutLoading}
+          >
+            {#if signOutLoading}<span class="loading loading-spinner"
+              ></span>{/if}
+            {m.vault_signout_button()}
+          </button>
+        </div>
+      </div>
+      <form method="dialog" class="modal-backdrop">
+        <button>close</button>
       </form>
     </dialog>
   </div>
