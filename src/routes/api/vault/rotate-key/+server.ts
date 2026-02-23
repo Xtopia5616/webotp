@@ -134,16 +134,19 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       err &&
       typeof err === "object" &&
       "status" in err &&
-      "body" in err &&
-      typeof (err as any).body === "object" &&
-      (err as any).body !== null &&
-      "message" in (err as any).body
+      "body" in err
     ) {
-      const httpError = err as { status: number; body: { message: string } };
-      return json(
-        { error: httpError.body.message },
-        { status: httpError.status },
-      );
+      const httpError = err as { status: number; body: unknown };
+      if (
+        httpError.body &&
+        typeof httpError.body === "object" &&
+        "message" in httpError.body
+      ) {
+        return json(
+          { error: (httpError.body as { message: string }).message },
+          { status: httpError.status },
+        );
+      }
     }
     console.error("Key rotation error:", err);
     return json({ error: "server_error" }, { status: 500 });
