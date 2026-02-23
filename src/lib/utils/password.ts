@@ -25,7 +25,7 @@ export function validatePasswordStrength(password: string): string | null {
   if (!/[0-9]/.test(password)) {
     return m.err_password_number();
   }
-  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+  if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
     return m.err_password_special();
   }
   return null;
