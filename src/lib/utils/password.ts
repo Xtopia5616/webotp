@@ -1,3 +1,5 @@
+import * as m from "$paraglide/messages.js";
+
 /**
  * Validates the strength of a password.
  * Requirements:
@@ -12,19 +14,19 @@
  */
 export function validatePasswordStrength(password: string): string | null {
   if (password.length < 8) {
-    return "Password must be at least 8 characters long.";
+    return m.err_password_length();
   }
   if (!/[a-z]/.test(password)) {
-    return "Password must contain at least one lowercase letter.";
+    return m.err_password_lowercase();
   }
   if (!/[A-Z]/.test(password)) {
-    return "Password must contain at least one uppercase letter.";
+    return m.err_password_uppercase();
   }
   if (!/[0-9]/.test(password)) {
-    return "Password must contain at least one number.";
+    return m.err_password_number();
   }
   if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-    return "Password must contain at least one special character.";
+    return m.err_password_special();
   }
   return null;
 }

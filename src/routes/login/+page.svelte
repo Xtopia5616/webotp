@@ -197,7 +197,7 @@
 
     try {
       if (!prfPassword) {
-        throw new Error("Biometric authentication expired. Please try again.");
+        throw new Error(m.err_prf_expired());
       }
 
       const emailVal = prfEmailInput.trim().toLowerCase();
