@@ -37,6 +37,20 @@
     }
   });
 
+  // Helper to map backend error codes to i18n messages
+  function getErrorMessage(code: string): string {
+    switch (code) {
+      case "missing_fields":
+        return m.err_missing_fields();
+      case "email_exists":
+        return m.err_email_exists();
+      case "registration_failed":
+        return m.err_registration_failed();
+      default:
+        return m.err_server_error();
+    }
+  }
+
   async function handleRegister() {
     loading = true;
     error = "";
@@ -90,7 +104,7 @@
 
       if (!registerRes.ok) {
         const data = await registerRes.json();
-        throw new Error(data.error || m.err_registration_failed());
+        throw new Error(getErrorMessage(data.error));
       }
 
       recoveryKey = rawRecoveryKey;

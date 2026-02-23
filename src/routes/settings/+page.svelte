@@ -181,6 +181,20 @@
     hasUnlockPRF = false;
   }
 
+  // Helper to map backend error codes to i18n messages
+  function getSyncErrorMessage(code: string): string {
+    switch (code) {
+      case "version_mismatch":
+        return m.err_version_mismatch();
+      case "unauthorized":
+        return m.err_unauthorized();
+      case "missing_fields":
+        return m.err_missing_fields();
+      default:
+        return m.err_sync_failed();
+    }
+  }
+
   async function handleRegenerateKey() {
     regenLoading = true;
     regenError = "";
@@ -235,7 +249,7 @@
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.message || m.err_sync_failed());
+        throw new Error(getSyncErrorMessage(data.error));
       }
 
       const result = await res.json();
@@ -278,6 +292,22 @@
     showRegenKey = false;
     newRecoveryKey = null;
     hasDownloadedRegenKey = false;
+  }
+
+  // Helper to map password change error codes
+  function getRotateErrorMessage(code: string): string {
+    switch (code) {
+      case "invalid_old_password":
+        return m.err_invalid_old_password();
+      case "version_mismatch":
+        return m.err_version_mismatch();
+      case "unauthorized":
+        return m.err_unauthorized();
+      case "missing_fields":
+        return m.err_missing_fields();
+      default:
+        return m.err_update_password_failed();
+    }
   }
 
   async function handleChangePassword() {
@@ -368,7 +398,7 @@
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.message || m.err_update_password_failed());
+        throw new Error(getRotateErrorMessage(data.error));
       }
 
       const { setLocalAuthParams, setLocalVault } = await import("$lib/db");

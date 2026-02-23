@@ -36,7 +36,7 @@ export const POST: RequestHandler = async (event) => {
     !encryptedBlob ||
     !encryptedDekByRecoveryKey
   ) {
-    return json({ error: "Missing required fields" }, { status: 400 });
+    return json({ error: "missing_fields" }, { status: 400 });
   }
 
   // Ensure email is strictly normalized on the server side as well
@@ -50,10 +50,7 @@ export const POST: RequestHandler = async (event) => {
     .limit(1);
 
   if (existing.length > 0) {
-    return json(
-      { error: "An account with this email already exists." },
-      { status: 409 },
-    );
+    return json({ error: "email_exists" }, { status: 409 });
   }
 
   let createdUserId: string | null = null;
@@ -131,13 +128,6 @@ export const POST: RequestHandler = async (event) => {
       }
     }
 
-    let message = "Registration failed due to a server error";
-    if (e instanceof Error) {
-      message = e.message;
-    } else if (typeof e === "string") {
-      message = e;
-    }
-
-    return json({ error: message }, { status: 400 });
+    return json({ error: "registration_failed" }, { status: 400 });
   }
 };

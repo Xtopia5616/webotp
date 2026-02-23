@@ -7,7 +7,7 @@ import type { RequestHandler } from "./$types";
 export const GET: RequestHandler = async ({ locals }) => {
   const session = locals.session;
   if (!session) {
-    throw error(401, "Unauthorized");
+    return json({ error: "unauthorized" }, { status: 401 });
   }
 
   const userId = session.userId;
@@ -43,7 +43,7 @@ interface VaultPutBody {
 export const PUT: RequestHandler = async ({ request, locals }) => {
   const session = locals.session;
   if (!session) {
-    throw error(401, "Unauthorized");
+    return json({ error: "unauthorized" }, { status: 401 });
   }
 
   const userId = session.userId;
@@ -52,7 +52,7 @@ export const PUT: RequestHandler = async ({ request, locals }) => {
   const { encryptedBlob, version, encryptedDekByRecoveryKey } = body;
 
   if (!encryptedBlob || version === undefined) {
-    throw error(400, "Missing required fields");
+    return json({ error: "missing_fields" }, { status: 400 });
   }
 
   try {
@@ -65,15 +65,12 @@ export const PUT: RequestHandler = async ({ request, locals }) => {
       // Case 1: Creation (Initial Vault Setup)
       if (current.length === 0) {
         if (version !== 0) {
-          throw error(400, "Invalid version for creation");
+          throw error(400, "invalid_version");
         }
 
         // Ensure we have the recovery key for new vaults
         if (!encryptedDekByRecoveryKey) {
-          throw error(
-            400,
-            "Recovery key encryption is required for new vaults",
-          );
+          throw error(400, "missing_fields");
         }
 
         const inserted = await tx
@@ -96,7 +93,7 @@ export const PUT: RequestHandler = async ({ request, locals }) => {
 
       if (currentVersion !== version) {
         // Conflict detected
-        throw error(412, "Precondition Failed: Version mismatch");
+        throw error(412, "version_mismatch");
       }
 
       const updated = await tx
@@ -117,16 +114,20 @@ export const PUT: RequestHandler = async ({ request, locals }) => {
 
     return json({ success: true, version: Number(result.version) });
   } catch (err: unknown) {
-    // Check if it's our 412/400 error (SvelteKit HttpError)
+    // Check if it's our thrown error(412/400) with a code as the message
     if (
       err &&
       typeof err === "object" &&
       "status" in err &&
-      (err.status === 412 || err.status === 400)
+      "body" in err &&
+      typeof (err as any).body === "object" &&
+      (err as any).body !== null &&
+      "message" in (err as any).body
     ) {
-      throw err;
+      const httpError = err as { status: number; body: { message: string } };
+      return json({ error: httpError.body.message }, { status: httpError.status });
     }
     console.error("Vault update error:", err);
-    throw error(500, "Failed to update vault");
+    return json({ error: "server_error" }, { status: 500 });
   }
 };

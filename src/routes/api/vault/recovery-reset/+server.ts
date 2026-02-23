@@ -39,7 +39,7 @@ export const POST: RequestHandler = async ({ request }) => {
     !newEncryptedBlob ||
     !newEncryptedDekByRecoveryKey
   ) {
-    throw error(400, "Missing required fields");
+    return json({ error: "missing_fields" }, { status: 400 });
   }
 
   // Enforce strict normalization on the server side
@@ -50,7 +50,9 @@ export const POST: RequestHandler = async ({ request }) => {
       // 1. Find User
       const users = await tx.select().from(user).where(eq(user.email, email));
 
-      if (users.length === 0) throw error(404, "User not found");
+      if (users.length === 0) {
+        throw error(404, "invalid_recovery_key");
+      }
       const u = users[0];
       const userId = u.id;
 
@@ -101,8 +103,11 @@ export const POST: RequestHandler = async ({ request }) => {
 
     return json({ success: true });
   } catch (e) {
-    if (e && typeof e === "object" && "status" in e) throw e;
+    if (e && typeof e === "object" && "status" in e) {
+      const httpError = e as { status: number; body: { message: string } };
+      return json({ error: httpError.body.message }, { status: httpError.status });
+    }
     console.error("Recovery reset error:", e);
-    throw error(500, "Failed to reset password");
+    return json({ error: "server_error" }, { status: 500 });
   }
 };

@@ -23,7 +23,7 @@ interface RotateKeyBody {
 export const POST: RequestHandler = async ({ request, locals }) => {
   const session = locals.session;
   if (!session) {
-    throw error(401, "Unauthorized");
+    return json({ error: "unauthorized" }, { status: 401 });
   }
 
   const userId = session.userId;
@@ -48,7 +48,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     !newEncryptedDekByRecoveryKey ||
     version === undefined
   ) {
-    throw error(400, "Missing required fields");
+    return json({ error: "missing_fields" }, { status: 400 });
   }
 
   try {
@@ -62,16 +62,16 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         )
         .limit(1);
 
-      if (accountRes.length === 0) throw error(500, "Account not found");
+      if (accountRes.length === 0) throw error(500, "server_error");
 
       const storedHash = accountRes[0].password;
       if (!storedHash) {
-        throw error(500, "Invalid account state");
+        throw error(500, "server_error");
       }
 
       const isValid = await verifyPassword(oldLak, storedHash);
       if (!isValid) {
-        throw error(403, "Invalid old password provided");
+        throw error(403, "invalid_old_password");
       }
 
       // 2. Update User Salts
@@ -102,11 +102,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         .where(eq(vault.userId, userId));
 
       if (currentVault.length === 0) {
-        throw error(404, "Vault not found");
+        throw error(404, "vault_not_found");
       }
 
       if (currentVault[0].version !== version) {
-        throw error(412, "Version mismatch");
+        throw error(412, "version_mismatch");
       }
 
       await tx
@@ -134,14 +134,15 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       err &&
       typeof err === "object" &&
       "status" in err &&
-      (err.status === 412 ||
-        err.status === 404 ||
-        err.status === 403 ||
-        err.status === 401)
+      "body" in err &&
+      typeof (err as any).body === "object" &&
+      (err as any).body !== null &&
+      "message" in (err as any).body
     ) {
-      throw err;
+      const httpError = err as { status: number; body: { message: string } };
+      return json({ error: httpError.body.message }, { status: httpError.status });
     }
     console.error("Key rotation error:", err);
-    throw error(500, "Failed to rotate key");
+    return json({ error: "server_error" }, { status: 500 });
   }
 };
