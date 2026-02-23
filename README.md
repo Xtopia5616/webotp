@@ -177,7 +177,7 @@ You can deploy this application using Docker. We recommend using Docker Compose 
 Create a `docker-compose.yml` file in the root of the project (or on your server):
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   db:

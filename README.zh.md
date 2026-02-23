@@ -177,7 +177,7 @@ pnpm dev
 在项目根目录（或您的服务器上）创建一个 `docker-compose.yml` 文件：
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   db:
