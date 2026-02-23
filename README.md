@@ -28,8 +28,8 @@
   - [Running the App](#running-the-app)
 - [Deployment](#deployment)
   - [Option 1: Vercel + Neon (Serverless)](#option-1-vercel--neon-serverless)
-  - [Option 2: Self-Hosted (VPS / Docker)](#option-2-self-hosted-vps--docker)
-- [Usage](#usage)
+  - [Option 2: Self-Hosted (Docker)](#option-2-self-hosted-docker)
+- [Usage Guide](#usage-guide)
 - [Security Model](#security-model)
 - [Development](#development)
 - [Contributing](#contributing)
@@ -106,19 +106,20 @@ WebOTP implements a "Trust No One" model. The server acts as a blind storage pro
 Create a `.env` file in the root directory:
 
 ```env
-# Database Connection
+# Database Connection (Required)
 DATABASE_URL="postgresql://user:password@localhost:5432/webotp"
 
-# Better Auth Configuration
+# Better Auth Configuration (Required)
+# A random string used to encrypt session tokens. Generate using: openssl rand -base64 32
 BETTER_AUTH_SECRET="your-super-secret-key-at-least-32-chars-long"
+
+# Public URL of your application (Required for WebAuthn and Cookies)
+# Use http://localhost:5173 for local development
 BETTER_AUTH_URL="http://localhost:5173"
 
-# Optional: If deploying to production
+# Optional: Production URL if different from BETTER_AUTH_URL
 # PUBLIC_URL="https://your-domain.com"
 ```
-
-- `BETTER_AUTH_SECRET`: A random string used to encrypt session tokens.
-- `BETTER_AUTH_URL`: The base URL of your application (required for WebAuthn and cookies).
 
 ### Database Setup
 
@@ -167,43 +168,91 @@ This is the recommended way to deploy WebOTP quickly for free.
       ```
 6.  **Redeploy**: Trigger a redeploy on Vercel if necessary.
 
-### Option 2: Self-Hosted (VPS / Docker)
+### Option 2: Self-Hosted (Docker)
 
-You can deploy this application like any standard SvelteKit Node.js app.
+You can deploy this application using Docker. We recommend using Docker Compose to manage both the application and the database.
 
-1.  **Build the App**:
-    ```bash
-    pnpm build
-    ```
-2.  **Environment Variables**: Ensure your production environment has the variables listed in the [Configuration](#configuration) section.
-3.  **Run Migrations**: Run `pnpm db:push` against your production database.
-4.  **Start the Server**:
-    You can use the output in `build/` with a Node.js adapter.
-    ```bash
-    node build
-    ```
-    For Docker, you can create a `Dockerfile` based on the Node.js image. Here is a minimal example:
-    ```dockerfile
-    FROM node:18-alpine
-    WORKDIR /app
-    COPY package.json pnpm-lock.yaml ./
-    RUN npm install -g pnpm && pnpm install --frozen-lockfile
-    COPY . .
-    RUN pnpm build
-    ENV NODE_ENV=production
-    EXPOSE 3000
-    CMD ["node", "build"]
-    ```
+#### 1. Create a `docker-compose.yml` file
 
-## Usage
+Create a `docker-compose.yml` file in the root of the project (or on your server):
 
-1. **Register**: Create a new account. You will receive a **Recovery Key**. Save this key securely; it is the only way to recover your data if you forget your password.
-2. **Login**: Use your email and master password.
-3. **Add Account**: Scan a QR code or enter details manually.
-4. **Settings**:
-   - **Change Password**: Rotate your encryption keys.
-   - **Biometric Unlock**: Enable Face ID/Touch ID.
-   - **Install App**: Add to Home Screen for a native experience.
+```yaml
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: webotp
+      POSTGRES_PASSWORD: your_secure_password_here
+      POSTGRES_DB: webotp
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U webotp"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: node:20-alpine
+    working_dir: /app
+    restart: always
+    environment:
+      # Connect to the internal docker service 'db'
+      DATABASE_URL: postgresql://webotp:your_secure_password_here@db:5432/webotp
+      # CHANGE THIS to a random string
+      BETTER_AUTH_SECRET: your-super-secret-key-at-least-32-chars-long
+      # CHANGE THIS to your actual domain
+      BETTER_AUTH_URL: https://your-domain.com
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    command: sh -c "npm install -g pnpm && pnpm install --frozen-lockfile && pnpm db:push && pnpm build && node build"
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+```
+
+#### 2. Run the container
+
+```bash
+docker-compose up -d
+```
+
+The application will be available at `http://localhost:3000`.
+
+> **Note**: For production, it is highly recommended to place a reverse proxy (like Nginx or Caddy) in front of the app to handle SSL termination.
+
+## Usage Guide
+
+1. **Register**:
+   - Create a new account using your email and a strong master password.
+   - **Crucial Step**: You will be presented with a **Recovery Key**. Download this key and store it securely offline. This is the **only** way to recover your data if you forget your master password. The server administrators cannot recover it for you.
+
+2. **Login**:
+   - Use your email and master password to unlock your vault.
+   - If you are on a trusted device, you can enable "Biometric Unlock" (Face ID/Touch ID) in settings to skip password entry.
+
+3. **Add Accounts**:
+   - Click the "Add Account" button.
+   - Scan a QR code, upload an image, or manually enter the secret key.
+   - You can also import data from other authenticator apps (Google Authenticator, Aegis, 2FAS).
+
+4. **Sync**:
+   - Your data is automatically synced to the cloud whenever you make changes.
+   - If you use multiple devices, changes are merged automatically in the background.
+
+5. **Recovery**:
+   - If you forget your password, click "Forgot Password?" on the login screen.
+   - Enter your email and the Recovery Key you saved during registration.
+   - Set a new password. Your data will be restored, and a new Recovery Key will be generated.
 
 ## Security Model
 

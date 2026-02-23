@@ -28,7 +28,7 @@
   - [运行应用](#运行应用)
 - [部署](#部署)
   - [方案 1: Vercel + Neon (Serverless)](#方案-1-vercel--neon-serverless)
-  - [方案 2: 自托管 (VPS / Docker)](#方案-2-自托管-vps--docker)
+  - [方案 2: 自托管 (Docker)](#方案-2-自托管-docker)
 - [使用指南](#使用指南)
 - [安全模型](#安全模型)
 - [开发](#开发)
@@ -106,19 +106,20 @@ WebOTP 实现了“不信任任何人”的模型。服务器充当盲存储提�
 在根目录创建 `.env` 文件：
 
 ```env
-# 数据库连接
+# 数据库连接 (必填)
 DATABASE_URL="postgresql://user:password@localhost:5432/webotp"
 
-# Better Auth 配置
+# Better Auth 配置 (必填)
+# 用于加密会话令牌的随机字符串。生成命令: openssl rand -base64 32
 BETTER_AUTH_SECRET="your-super-secret-key-at-least-32-chars-long"
+
+# 应用的公开 URL (WebAuthn 和 Cookie 必需)
+# 本地开发使用 http://localhost:5173
 BETTER_AUTH_URL="http://localhost:5173"
 
-# 可选：如果部署到生产环境
+# 可选：如果生产环境 URL 与 BETTER_AUTH_URL 不同
 # PUBLIC_URL="https://your-domain.com"
 ```
-
-- `BETTER_AUTH_SECRET`：用于加密会话令牌的随机字符串。
-- `BETTER_AUTH_URL`：应用的基础 URL（WebAuthn 和 Cookie 必需）。
 
 ### 数据库设置
 
@@ -160,50 +161,98 @@ pnpm dev
     - `BETTER_AUTH_SECRET`：生成一个随机字符串（至少 32 个字符）。
     - `BETTER_AUTH_URL`：您的 Vercel 部署 URL（例如 `https://webotp.vercel.app`）。**不要**添加尾部斜杠。
 5.  **推送数据库架构**：
-    在应用运行之前，您需要创建数据库表。
+    在应用可以工作之前，您需要创建数据库表。
     - 在本地运行以下命令（将 URL 替换为您的 Neon 连接字符串）：
       ```bash
       DATABASE_URL="postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/webotp?sslmode=require" pnpm db:push
       ```
 6.  **重新部署**：如有必要，在 Vercel 上触发重新部署。
 
-### 方案 2: 自托管 (VPS / Docker)
+### 方案 2: 自托管 (Docker)
 
-您可以像部署任何标准 SvelteKit Node.js 应用一样部署此应用。
+您可以使用 Docker 部署此应用。我们建议使用 Docker Compose 来管理应用和数据库。
 
-1.  **构建应用**：
-    ```bash
-    pnpm build
-    ```
-2.  **环境变量**：确保您的生产环境具有[配置](#配置)部分列出的变量。
-3.  **运行迁移**：针对您的生产数据库运行 `pnpm db:push`。
-4.  **启动服务器**：
-    您可以使用 `build/` 中的输出配合 Node.js 适配器。
-    ```bash
-    node build
-    ```
-    对于 Docker，您可以创建一个基于 Node.js 镜像的 `Dockerfile`。这是一个最小示例：
-    ```dockerfile
-    FROM node:18-alpine
-    WORKDIR /app
-    COPY package.json pnpm-lock.yaml ./
-    RUN npm install -g pnpm && pnpm install --frozen-lockfile
-    COPY . .
-    RUN pnpm build
-    ENV NODE_ENV=production
-    EXPOSE 3000
-    CMD ["node", "build"]
-    ```
+#### 1. 创建 `docker-compose.yml` 文件
+
+在项目根目录（或您的服务器上）创建一个 `docker-compose.yml` 文件：
+
+```yaml
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: webotp
+      POSTGRES_PASSWORD: your_secure_password_here
+      POSTGRES_DB: webotp
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U webotp"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: node:20-alpine
+    working_dir: /app
+    restart: always
+    environment:
+      # 连接到内部 docker 服务 'db'
+      DATABASE_URL: postgresql://webotp:your_secure_password_here@db:5432/webotp
+      # 修改此处：设置一个随机字符串
+      BETTER_AUTH_SECRET: your-super-secret-key-at-least-32-chars-long
+      # 修改此处：您的实际域名
+      BETTER_AUTH_URL: https://your-domain.com
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    command: sh -c "npm install -g pnpm && pnpm install --frozen-lockfile && pnpm db:push && pnpm build && node build"
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+```
+
+#### 2. 运行容器
+
+```bash
+docker-compose up -d
+```
+
+应用将在 `http://localhost:3000` 上可用。
+
+> **注意**：在生产环境中，强烈建议在应用前放置反向代理（如 Nginx 或 Caddy）以处理 SSL 终止。
 
 ## 使用指南
 
-1. **注册**：创建一个新账户。您将收到一个**恢复密钥**。请安全保存此密钥；这是您忘记密码后找回数据的唯一方式。
-2. **登录**：使用您的邮箱和主密码。
-3. **添加账户**：扫描二维码或手动输入详情。
-4. **设置**：
-   - **修改密码**：轮换您的加密密钥。
-   - **生物识别解锁**：启用 Face ID/Touch ID。
-   - **安装应用**：添加到主屏幕以获得原生体验。
+1. **注册**：
+   - 使用您的邮箱和一个强主密码创建一个新账户。
+   - **关键步骤**：系统将向您展示一个 **恢复密钥**。请下载此密钥并安全地离线存储。这是您忘记主密码后找回数据的**唯一**方式。服务器管理员无法为您恢复。
+
+2. **登录**：
+   - 使用您的邮箱和主密码解锁保险库。
+   - 如果您在受信任的设备上，可以在设置中启用“生物识别解锁”（Face ID/Touch ID）以跳过密码输入。
+
+3. **添加账户**：
+   - 点击“添加账户”按钮。
+   - 扫描二维码、上传图片或手动输入密钥。
+   - 您也可以从其他验证器应用（Google Authenticator、Aegis、2FAS）导入数据。
+
+4. **同步**：
+   - 您的数据会在您进行更改时自动同步到云端。
+   - 如果您使用多个设备，更改会在后台自动合并。
+
+5. **恢复**：
+   - 如果您忘记了密码，请在登录屏幕上点击“忘记密码？”。
+   - 输入您的电子邮件和注册时保存的恢复密钥。
+   - 设置新密码。您的数据将被恢复，并会生成一个新的恢复密钥。
 
 ## 安全模型
 
