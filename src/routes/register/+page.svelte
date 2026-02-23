@@ -12,6 +12,7 @@
   import * as m from "$paraglide/messages.js";
   import { ShieldAlert, KeyRound, Download } from "lucide-svelte";
   import ThemeToggle from "$lib/components/ThemeToggle.svelte";
+  import { validatePasswordStrength } from "$lib/utils/password";
 
   function generateSalt() {
     return Array.from(crypto.getRandomValues(new Uint8Array(16)))
@@ -39,6 +40,13 @@
   async function handleRegister() {
     loading = true;
     error = "";
+
+    const validationError = validatePasswordStrength(password);
+    if (validationError) {
+      error = validationError;
+      loading = false;
+      return;
+    }
 
     if (password !== confirmPassword) {
       error = m.err_passwords_mismatch();

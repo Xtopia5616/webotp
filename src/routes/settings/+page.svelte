@@ -36,6 +36,7 @@
     Check,
   } from "lucide-svelte";
   import ThemeToggle from "$lib/components/ThemeToggle.svelte";
+  import { validatePasswordStrength } from "$lib/utils/password";
 
   let oldPassword = $state("");
   let newPassword = $state("");
@@ -283,14 +284,15 @@
     loading = true;
     error = "";
 
-    if (newPassword !== confirmPassword) {
-      error = m.err_new_passwords_mismatch();
+    const validationError = validatePasswordStrength(newPassword);
+    if (validationError) {
+      error = validationError;
       loading = false;
       return;
     }
 
-    if (newPassword.length < 8) {
-      error = m.err_password_length();
+    if (newPassword !== confirmPassword) {
+      error = m.err_new_passwords_mismatch();
       loading = false;
       return;
     }
