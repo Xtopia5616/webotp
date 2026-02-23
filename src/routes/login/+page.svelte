@@ -359,7 +359,7 @@
             {m.vault_unlock_or()}
           </div>
 
-          {#if prfStep === 'email_input'}
+          {#if prfStep === "email_input"}
             <!-- Email Input Form for PRF flow -->
             <form onsubmit={handlePrfEmailSubmit}>
               <p class="text-sm text-center mb-3 text-base-content/80">
@@ -384,7 +384,11 @@
               </div>
 
               <div class="form-control mt-3">
-                <button type="submit" class="btn btn-primary" disabled={prfLoading}>
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  disabled={prfLoading}
+                >
                   {#if prfLoading}
                     <span class="loading loading-spinner"></span>
                   {/if}
