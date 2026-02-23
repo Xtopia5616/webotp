@@ -300,7 +300,8 @@
 
           <div class="form-control">
             <label for="email" class="label">
-              <span class="label-text font-medium">{m.login_email_label()}</span>
+              <span class="label-text font-medium">{m.login_email_label()}</span
+              >
             </label>
             <input
               id="email"
