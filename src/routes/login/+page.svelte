@@ -289,70 +289,67 @@
     </div>
 
     <div class="card w-full shadow-xl bg-base-100 border border-base-300">
-      <form
-        class="card-body"
-        onsubmit={(e) => {
-          void handleLogin(e);
-        }}
-      >
-        {#if error}
-          <div class="alert alert-error text-sm py-2 rounded-lg">
-            <ShieldAlert size={16} />
-            <span>{error}</span>
+      <div class="card-body">
+        <form onsubmit={handleLogin}>
+          {#if error}
+            <div class="alert alert-error text-sm py-2 rounded-lg">
+              <ShieldAlert size={16} />
+              <span>{error}</span>
+            </div>
+          {/if}
+
+          <div class="form-control">
+            <label for="email" class="label">
+              <span class="label-text font-medium">{m.login_email_label()}</span>
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              bind:value={email}
+              required
+              class="input input-bordered focus:input-primary"
+              placeholder={m.placeholder_email()}
+              autocomplete="username"
+            />
           </div>
-        {/if}
 
-        <div class="form-control">
-          <label for="email" class="label">
-            <span class="label-text font-medium">{m.login_email_label()}</span>
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            bind:value={email}
-            required
-            class="input input-bordered focus:input-primary"
-            placeholder={m.placeholder_email()}
-            autocomplete="username"
-          />
-        </div>
+          <div class="form-control mt-2">
+            <label for="password" class="label">
+              <span class="label-text font-medium"
+                >{m.login_password_label()}</span
+              >
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              bind:value={password}
+              required
+              class="input input-bordered focus:input-primary"
+              placeholder={m.placeholder_password()}
+              autocomplete="current-password"
+            />
+          </div>
 
-        <div class="form-control mt-2">
-          <label for="password" class="label">
-            <span class="label-text font-medium"
-              >{m.login_password_label()}</span
+          <div class="text-right mt-1">
+            <a
+              href="/recovery"
+              class="link link-hover text-sm text-base-content/70 hover:text-primary"
             >
-          </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            bind:value={password}
-            required
-            class="input input-bordered focus:input-primary"
-            placeholder={m.placeholder_password()}
-            autocomplete="current-password"
-          />
-        </div>
+              {m.login_forgot_link()}
+            </a>
+          </div>
 
-        <div class="text-right mt-1">
-          <a
-            href="/recovery"
-            class="link link-hover text-sm text-base-content/70 hover:text-primary"
-          >
-            {m.login_forgot_link()}
-          </a>
-        </div>
-
-        <div class="form-control mt-4">
-          <button type="submit" class="btn btn-primary" disabled={loading}>
-            {#if loading}
-              <span class="loading loading-spinner"></span>
-            {/if}
-            {loading ? m.login_unlocking() : m.login_button()}
-          </button>
-        </div>
+          <div class="form-control mt-4">
+            <button type="submit" class="btn btn-primary" disabled={loading}>
+              {#if loading}
+                <span class="loading loading-spinner"></span>
+              {/if}
+              {loading ? m.login_unlocking() : m.login_button()}
+            </button>
+          </div>
+        </form>
 
         {#if hasPRF}
           <div class="divider text-base-content/40 text-sm">
@@ -427,7 +424,7 @@
             </button>
           {/if}
         {/if}
-      </form>
+      </div>
     </div>
 
     <div class="text-center mt-4">
