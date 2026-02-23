@@ -105,7 +105,10 @@ export const POST: RequestHandler = async ({ request }) => {
   } catch (e) {
     if (e && typeof e === "object" && "status" in e) {
       const httpError = e as { status: number; body: { message: string } };
-      return json({ error: httpError.body.message }, { status: httpError.status });
+      return json(
+        { error: httpError.body.message },
+        { status: httpError.status },
+      );
     }
     console.error("Recovery reset error:", e);
     return json({ error: "server_error" }, { status: 500 });

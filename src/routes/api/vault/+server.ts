@@ -125,7 +125,10 @@ export const PUT: RequestHandler = async ({ request, locals }) => {
       "message" in (err as any).body
     ) {
       const httpError = err as { status: number; body: { message: string } };
-      return json({ error: httpError.body.message }, { status: httpError.status });
+      return json(
+        { error: httpError.body.message },
+        { status: httpError.status },
+      );
     }
     console.error("Vault update error:", err);
     return json({ error: "server_error" }, { status: 500 });
