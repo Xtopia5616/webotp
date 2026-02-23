@@ -178,10 +178,10 @@
       >
     </div>
 
-    <!-- Hide code and timer on desktop (lg) to prevent overlap -->
-    <div class="flex items-center gap-2 sm:gap-4 shrink-0 lg:hidden">
+    <div class="flex items-center gap-2 sm:gap-4 shrink-0">
+      <!-- Hide Eye button on desktop -->
       <button
-        class="btn btn-sm btn-circle btn-ghost text-base-content/40 hover:text-primary hover:bg-base-200"
+        class="btn btn-sm btn-circle btn-ghost text-base-content/40 hover:text-primary hover:bg-base-200 lg:hidden"
         onclick={(e) => {
           e.stopPropagation();
           isVisible = !isVisible;
@@ -191,8 +191,9 @@
         {#if isVisible}<EyeOff size={18} />{:else}<Eye size={18} />{/if}
       </button>
 
+      <!-- Hide Code display on desktop -->
       <div
-        class="font-mono text-3xl sm:text-4xl tracking-widest select-all text-primary font-semibold w-[120px] sm:w-[150px] text-center flex items-center justify-center"
+        class="font-mono text-3xl sm:text-4xl tracking-widest select-all text-primary font-semibold w-[120px] sm:w-[150px] text-center flex items-center justify-center lg:hidden"
       >
         {#if copied}
           <span
@@ -211,6 +212,7 @@
         {/if}
       </div>
 
+      <!-- Keep Timer visible on desktop -->
       <div
         class="radial-progress text-primary ml-1"
         style="--value:{progress}; --size:2.5rem; --thickness: 3px;"
