@@ -130,12 +130,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
     return json({ success: true });
   } catch (err: unknown) {
-    if (
-      err &&
-      typeof err === "object" &&
-      "status" in err &&
-      "body" in err
-    ) {
+    if (err && typeof err === "object" && "status" in err && "body" in err) {
       const httpError = err as { status: number; body: unknown };
       if (
         httpError.body &&

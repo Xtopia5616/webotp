@@ -115,12 +115,7 @@ export const PUT: RequestHandler = async ({ request, locals }) => {
     return json({ success: true, version: Number(result.version) });
   } catch (err: unknown) {
     // Check if it's our thrown error(412/400) with a code as the message
-    if (
-      err &&
-      typeof err === "object" &&
-      "status" in err &&
-      "body" in err
-    ) {
+    if (err && typeof err === "object" && "status" in err && "body" in err) {
       const httpError = err as { status: number; body: unknown };
       if (
         httpError.body &&
