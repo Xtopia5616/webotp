@@ -70,10 +70,11 @@ export const handle: Handle = async ({ event, resolve }) => {
   // 5. Set CSP Header
   // 注意：在开发环境(dev)允许 unsafe-eval 是为了让 HMR 正常工作
   // 生产环境通常不需要 unsafe-eval，除非你有特殊库依赖它
+  // 修复：添加 'unsafe-inline' 到 style-src 以支持 Svelte 动态样式和 DaisyUI
   const cspDirectives = [
     `default-src 'self'`,
     `script-src 'self' 'nonce-${nonce}' ${dev ? "'unsafe-eval'" : ""}`,
-    `style-src 'self' 'nonce-${nonce}'`, // 考虑加上 'unsafe-inline' 如果使用了内联样式
+    `style-src 'self' 'unsafe-inline'`, // 修复了阻止内联样式的问题
     `img-src 'self' data: https:`, // 允许加载外部图片（如用户头像）
     `font-src 'self' data:`,
     `object-src 'none'`,
