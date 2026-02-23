@@ -7,7 +7,9 @@ test("homepage has title and links to login", async ({ page }) => {
   await expect(page).toHaveTitle(/WebOTP/);
 
   // Check for the "Get Started" button which leads to login
-  await expect(page.getByRole("button", { name: /Get Started/i })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /Get Started/i }),
+  ).toBeVisible();
 });
 
 test("login page loads and shows form", async ({ page }) => {
@@ -15,10 +17,12 @@ test("login page loads and shows form", async ({ page }) => {
 
   // Check for email input
   await expect(page.getByLabel(/Email/i)).toBeVisible();
-  
+
   // Check for password input
   await expect(page.getByLabel(/Password/i)).toBeVisible();
-  
+
   // Check for submit button
-  await expect(page.getByRole("button", { name: /Unlock Vault/i })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /Unlock Vault/i }),
+  ).toBeVisible();
 });
