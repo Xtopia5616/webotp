@@ -178,7 +178,8 @@
       >
     </div>
 
-    <div class="flex items-center gap-2 sm:gap-4 shrink-0">
+    <!-- Hide code and timer on desktop (lg) to prevent overlap -->
+    <div class="flex items-center gap-2 sm:gap-4 shrink-0 lg:hidden">
       <button
         class="btn btn-sm btn-circle btn-ghost text-base-content/40 hover:text-primary hover:bg-base-200"
         onclick={(e) => {

@@ -558,11 +558,11 @@
         </div>
       </div>
     {:else}
-      <div class="text-center mb-4">
+      <div class="text-center mb-2">
         <h1 class="text-3xl font-extrabold tracking-tight text-primary">
           {m.settings_title()}
         </h1>
-        <p class="py-2 text-base-content/70 font-medium">
+        <p class="py-1 text-base-content/70 font-medium">
           {m.settings_subtitle()}
         </p>
       </div>
